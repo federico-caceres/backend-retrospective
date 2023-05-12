@@ -10,7 +10,7 @@ Proyecto final en BootCamp de Make it Real
 - Dependencias del proyecto instaladas (ejecutar `npm install`)
 ### Configuración
 
-- Copiar el archivo `env.example` a `env`
+- Copiar el archivo `env.example` a `.env`
 
 ### Ejecución del proyecto
 
