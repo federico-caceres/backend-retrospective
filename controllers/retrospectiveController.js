@@ -4,7 +4,7 @@ const Card = require('../db/models/card');
 const { connection } = require('../db/connectionDB');
 
 
-// creación de nueva categoría
+// Creación de nueva categoría
 retrospectiveCtrl.createCategory = async (req, res) =>
 {
     const category = new Category({
@@ -22,7 +22,7 @@ retrospectiveCtrl.createCategory = async (req, res) =>
 
 };
 
-// obtención de categorías
+// Obtención de categorías
 retrospectiveCtrl.getCategories = async (req, res) => 
 {
     try {
@@ -33,7 +33,19 @@ retrospectiveCtrl.getCategories = async (req, res) =>
     }
 };
 
-// creación de nueva tarjeta
+// Actualización de categoría
+retrospectiveCtrl.updateCategory = async (req, res) =>
+{
+    try {
+        const { id, color } = req.body;
+        const category = await Category.findByIdAndUpdate(id, { color }, { new: true });
+        res.status(200).json(category);
+    } catch (error) {
+        res.status(500).send(error.message);
+    } 
+};
+
+// Creación de nueva tarjeta
 retrospectiveCtrl.createCard = async (req, res) =>
 {
     try {
@@ -59,7 +71,7 @@ retrospectiveCtrl.createCard = async (req, res) =>
     }
 }
 
-// obtención de todas las tarjetas
+// Obtención de todas las tarjetas
 retrospectiveCtrl.getAllCards = async (req, res) =>
 {
     try {
@@ -70,7 +82,7 @@ retrospectiveCtrl.getAllCards = async (req, res) =>
     }
 };
 
-// actualización de descripción de tarjeta
+// Actualización de datos de tarjeta
 retrospectiveCtrl.updateCard = async (req, res) =>
 {
     try {
@@ -82,19 +94,23 @@ retrospectiveCtrl.updateCard = async (req, res) =>
     } 
 };
 
-// eliminación de tarjeta
+// Eliminación de tarjeta
 retrospectiveCtrl.deleteCard = async (req, res) =>
 {
     try {
         const { id } = req.body;
         const card = await Card.findByIdAndDelete(id);
+        if (!card) {
+            return res.status(404).json({ message: 'Tarjeta no encontrada' });
+        }
+
         res.status(200).json(card);
     } catch (error) {
         res.status(500).send(error.message);
     }
 };
 
-// actualización de likes de tarjeta
+// Actualización de likes de tarjeta
 retrospectiveCtrl.updateLikes = async (req, res) =>
 {
     try {
@@ -103,19 +119,24 @@ retrospectiveCtrl.updateLikes = async (req, res) =>
         const card = await Card.findById(id);
 
         if (!card) {
-          return res.status(404).json({ message: 'Tarjeta no encontrada' });
+          return res.status(404).json({success: false, message: 'Tarjeta no encontrada' });
         }
-    
+
+        // Validamos que una tarjeta no pueda tener más de un like
+        if (card.likes > 0) {
+            return res.status(200).json({success: false, message: 'Solo un me gusta por tarjeta!' });
+        }
         card.likes++;
+    
         const updatedCard = await card.save();
     
-        res.status(200).json(updatedCard);        
+        res.status(200).json({success: true, card: updatedCard});        
     } catch (error) {
         res.status(500).send(error.message);
     }
 }
 
-// agregar comentario a tarjeta
+// Agregar comentario a tarjeta
 retrospectiveCtrl.addComment = async (req, res) =>
 {
     try {
